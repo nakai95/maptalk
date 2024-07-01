@@ -4,10 +4,12 @@ import (
 	"maptalk/internal/domain/entity"
 )
 
+// Controller
 type UserInputPort interface {
 	GetUserByID(id string) (*UserOutputData, error)
 }
 
+// Presenter
 type UserOutputData struct {
     ID   string
     Name string
@@ -17,6 +19,7 @@ type UserOutputPort interface {
     PresentUser(user *UserData) (*UserOutputData, error)
 }
 
+// Repository
 type UserData struct {
     ID   string
     Name string
@@ -26,6 +29,7 @@ type UserDataAccess interface {
     FindByID(id string) (*UserData, error)
 }
 
+// UseCase
 type userUseCase struct {
 	outputPort UserOutputPort
     dataAccess UserDataAccess

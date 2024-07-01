@@ -8,7 +8,8 @@ type UserController struct {
 	userUseCase usecase.UserInputPort
 }
 
-func NewUserController(u usecase.UserInputPort) *UserController {
+func NewUserController(presenter usecase.UserOutputPort, repository usecase.UserDataAccess) *UserController {
+	u := usecase.NewUserUseCase(presenter, repository)
 	return &UserController{
 		userUseCase: u,
 	}

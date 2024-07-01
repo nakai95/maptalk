@@ -1,7 +1,6 @@
 package router
 
 import (
-	"maptalk/internal/domain/usecase"
 	"maptalk/internal/interface/controller"
 	"maptalk/internal/interface/presenter"
 	"maptalk/internal/interface/repository"
@@ -18,8 +17,7 @@ func NewRouter() *echo.Echo {
 
 	userPresenter := presenter.NewUserPresenter()
     userRepository := repository.NewUserRepository()
-	userUseCase := usecase.NewUserUseCase(userPresenter, userRepository)
-	userController := controller.NewUserController(userUseCase)
+	userController := controller.NewUserController(userPresenter, userRepository)
     
 
     e.GET("/users/:id", func(c echo.Context) error {
