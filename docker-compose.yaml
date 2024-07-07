@@ -1,0 +1,13 @@
+version: '3'
+services:
+  maptalk:
+    container_name: maptalk
+    ports:
+      - 8080
+    build: 
+      context: .
+      dockerfile: ./build/DockerFile
+    volumes:
+      - .:/maptalk
+    env_file:
+      - ./build/.go_env
