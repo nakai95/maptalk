@@ -22,3 +22,7 @@ func (c *UserController) GetUserByID(id string) (*usecase.UserOutputData, error)
 	}
 	return user, nil
 }
+
+func (c *UserController) seave(name string) (name, error){
+	user, err := c.userUseCase.save(name)
+}

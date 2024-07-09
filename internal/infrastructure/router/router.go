@@ -29,5 +29,12 @@ func NewRouter() *echo.Echo {
         return c.JSON(200, user)
     })
 
+	e.GET("/users/:name", func(c echo.Context) error {
+		name := c.Param("name")
+		
+	}
+
+	)
+
     return e
 }

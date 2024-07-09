@@ -27,6 +27,7 @@ type UserData struct {
 
 type UserDataAccess interface {
     FindByID(id string) (*UserData, error)
+    save(name string) (string, error)
 }
 
 // UseCase
@@ -58,4 +59,12 @@ func (u *userUseCase) GetUserByID(id string) (*UserOutputData, error) {
     }
 
    return u.outputPort.PresentUser(userData)
+}
+
+func (u *userUseCase) save(name string) (string, error) {
+    n, err := u.dataAccess.save(name)
+    if err != nil {
+        return "", err
+    }
+    return n, nil
 }
