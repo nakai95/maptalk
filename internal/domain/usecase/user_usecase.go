@@ -2,60 +2,30 @@ package usecase
 
 import (
 	"maptalk/internal/domain/entity"
+	"maptalk/internal/domain/usecase/port"
 )
-
-// Controller
-type UserInputPort interface {
-	GetUserByID(id string) (*UserOutputData, error)
-}
-
-// Presenter
-type UserOutputData struct {
-    ID   string
-    Name string
-}
-
-type UserOutputPort interface {
-    PresentUser(user *UserData) (*UserOutputData, error)
-}
-
-// Repository
-type UserData struct {
-    ID   string
-    Name string
-}
-
-type UserDataAccess interface {
-    FindByID(id string) (*UserData, error)
-}
 
 // UseCase
 type userUseCase struct {
-	outputPort UserOutputPort
-    dataAccess UserDataAccess
+	outputPort port.UserOutput
+	dataAccess port.UserDataAccess
 }
 
-func NewUserUseCase(outputPort UserOutputPort, dataAccess UserDataAccess) UserInputPort {
+func NewUserUseCase(outputPort port.UserOutput, dataAccess port.UserDataAccess) port.UserInput {
 	return &userUseCase{
-        outputPort: outputPort,
-        dataAccess: dataAccess,
-    }
+		outputPort: outputPort,
+		dataAccess: dataAccess,
+	}
 }
-func (u *userUseCase) GetUserByID(id string) (*UserOutputData, error) {
+func (u *userUseCase) GetUserByID(id string) (port.UserOutputData, error) {
 	userData, err := u.dataAccess.FindByID(id)
-    if err != nil {
-        return nil, err
-    }
-    // Convert user data to domain entity
-    userEntity := &entity.User{
-        ID:   userData.ID,
-        Name: userData.Name,
-    }
-    // Convert domain entity to user data
-    userData = &UserData{
-        ID:   userEntity.ID,
-        Name: userEntity.Name,
-    }
+	if err != nil {
+		return port.UserOutputData{}, err
+	}
+	// Convert user data to domain entity
+	userEntity := entity.User(userData)
+	// Convert domain entity to user data
+	userData = port.UserData(userEntity)
 
-   return u.outputPort.PresentUser(userData)
+	return u.outputPort.PresentUser(userData)
 }

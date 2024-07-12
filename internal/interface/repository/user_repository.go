@@ -1,21 +1,20 @@
 package repository
 
 import (
-	"maptalk/internal/domain/usecase"
+	"maptalk/internal/domain/usecase/port"
 )
-
 
 type userRepository struct{}
 
-func NewUserRepository() usecase.UserDataAccess {
+func NewUserRepository() port.UserDataAccess {
 	return &userRepository{}
 }
 
-func (p *userRepository) FindByID(id string) (*usecase.UserData, error) {
-    // dummy data
-    user := &usecase.UserData{
-        ID:   id,
-        Name: "John Doe",
-    }
-    return user, nil
+func (p *userRepository) FindByID(id string) (port.UserData, error) {
+	// dummy data
+	user := port.UserData{
+		ID:   id,
+		Name: "John Doe",
+	}
+	return user, nil
 }
