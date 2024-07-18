@@ -6,7 +6,7 @@
 go run cmd/maptalk/main.go
 ```
 
-## Tedt
+## Test
 
 ```console
 go generate ./...
