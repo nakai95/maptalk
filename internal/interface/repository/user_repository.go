@@ -3,8 +3,6 @@ package repository
 import (
 	"context"
 	"maptalk/internal/domain/usecase"
-
-	"cloud.google.com/go/firestore"
 )
 
 
@@ -13,13 +11,17 @@ type userRepository struct{
 }
 
 type DataStore interface {
-    createClient(ctx context.Context) (*firestore.Client)
-    insertData(ctx context.Context, client *firestore.Client, name string)
+    InsertData(ctx context.Context, user UserAccessData)
 }
 
-func NewUserRepository() usecase.UserDataAccess {
+type UserAccessData struct {
+    ID   string
+    Name string
+}
+
+func NewUserRepository(datastore DataStore) usecase.UserDataAccess {
 	return &userRepository{
-        datastore: datastore
+        datastore: datastore,
     }
 }
 
@@ -32,10 +34,16 @@ func (p *userRepository) FindByID(id string) (*usecase.UserData, error) {
     return user, nil
 }
 
-func (repo *userRepository) save(name string) (string, error) {
-    cont := context.Background()
-    client := repo.datastore.createClient(cont)
-    defer client.Close()
-    repo.datastore.insertData(cont, client, name)
-    return name, nil
+func (repo *userRepository) Save(user usecase.UserData) (*usecase.UserData, error) {
+    ctx := context.Background()
+    userData := &usecase.UserData{
+        ID:   user.ID,
+        Name: user.Name,
+    }
+    userAccessData := &UserAccessData{
+        ID:   userData.ID,
+        Name: userData.Name,
+    }
+    repo.datastore.InsertData(ctx, *userAccessData)
+    return userData, nil
 } 
