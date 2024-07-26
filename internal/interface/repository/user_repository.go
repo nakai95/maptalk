@@ -34,8 +34,7 @@ func (p *userRepository) FindByID(id string) (*usecase.UserData, error) {
     return user, nil
 }
 
-func (repo *userRepository) Save(user usecase.UserData) (*usecase.UserData, error) {
-    ctx := context.Background()
+func (repo *userRepository) Save(user usecase.UserData, ctx context.Context) (*usecase.UserData, error) {
     userData := &usecase.UserData{
         ID:   user.ID,
         Name: user.Name,

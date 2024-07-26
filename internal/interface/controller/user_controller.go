@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"maptalk/internal/domain/usecase"
 )
 
@@ -23,8 +24,8 @@ func (c *UserController) GetUserByID(id string) (*usecase.UserOutputData, error)
 	return user, nil
 }
 
-func (c *UserController) Save(name string) (*usecase.UserOutputData, error){
-	user, err := c.userUseCase.Save(name)
+func (c *UserController) Save(name string, ctx context.Context) (*usecase.UserOutputData, error){
+	user, err := c.userUseCase.Save(name, ctx)
 	if err != nil {
 		return nil, err
 	}

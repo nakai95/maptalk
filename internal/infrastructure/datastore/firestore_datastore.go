@@ -9,25 +9,24 @@ import (
 )
 
 type Datastore struct {
-    client *firestore.Client
+    projectID string
 }
 
-func NewDataStore(ctx context.Context) (*Datastore, error) {
-    projectID := "test-project"
-
-    client, err := firestore.NewClient(ctx, projectID)
-    if err != nil {
-        return nil, err
-    }
-    return &Datastore{client: client}, nil
-}
-
-func (ds *Datastore) Close() error {
-    return ds.client.Close()
+func NewDataStore(projectID string) (*Datastore, error) {
+    return &Datastore{
+        projectID: projectID,
+    }, nil 
 }
 
 func (ds *Datastore) InsertData(ctx context.Context, user repository.UserAccessData) {
-    _, _, err := ds.client.Collection("users").Add(ctx, map[string]interface{}{
+    client, err := firestore.NewClient(ctx, ds.projectID)
+    if err != nil {
+        fmt.Print("error")
+    }
+
+    defer client.Close()
+
+    _, _, err = client.Collection("users").Add(ctx, map[string]interface{}{
         "id": user.ID,
         "name": user.Name,
     })

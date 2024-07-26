@@ -4,12 +4,13 @@ import (
 	"maptalk/internal/domain/entity"
     "math/rand"
     "strconv"
+    "context"
 )
 
 // Controller
 type UserInputPort interface {
 	GetUserByID(id string) (*UserOutputData, error)
-    Save(name string) (*UserOutputData, error)
+    Save(name string, ctx context.Context) (*UserOutputData, error)
 }
 
 // Presenter
@@ -30,7 +31,7 @@ type UserData struct {
 
 type UserDataAccess interface {
     FindByID(id string) (*UserData, error)
-    Save(user UserData) (*UserData, error)
+    Save(user UserData, ctx context.Context) (*UserData, error)
 }
 
 // UseCase
@@ -64,12 +65,12 @@ func (u *userUseCase) GetUserByID(id string) (*UserOutputData, error) {
    return u.outputPort.PresentUser(userData)
 }
 
-func (u *userUseCase) Save(name string) (*UserOutputData, error) {
+func (u *userUseCase) Save(name string, ctx context.Context) (*UserOutputData, error) {
     user := &UserData{
         ID: strconv.Itoa(rand.Intn(100)),
         Name: name,
     }
-    n, err := u.dataAccess.Save(*user)
+    n, err := u.dataAccess.Save(*user, ctx)
     if err != nil {
         return nil, err
     }
