@@ -1,7 +1,7 @@
 package datastore
 
 import (
-    "maptalk/internal/interface/repository"
+    "maptalk/internal/interface/repository/port"
 
 	"context"
 	"cloud.google.com/go/firestore"
@@ -18,7 +18,7 @@ func NewDataStore(projectID string) (*Datastore, error) {
     }, nil 
 }
 
-func (ds *Datastore) InsertData(ctx context.Context, user repository.UserAccessData) {
+func (ds *Datastore) InsertData(ctx context.Context, user repositoryPort.UserAccessData) {
     client, err := firestore.NewClient(ctx, ds.projectID)
     if err != nil {
         fmt.Print("error")

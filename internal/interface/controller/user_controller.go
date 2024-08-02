@@ -3,31 +3,32 @@ package controller
 import (
 	"context"
 	"maptalk/internal/domain/usecase"
+	"maptalk/internal/domain/usecase/port"
 )
 
 type UserController struct {
-	userUseCase usecase.UserInputPort
+	userUseCase port.UserInput
 }
 
-func NewUserController(presenter usecase.UserOutputPort, repository usecase.UserDataAccess) *UserController {
+func NewUserController(presenter port.UserOutput, repository port.UserDataAccess) *UserController {
 	u := usecase.NewUserUseCase(presenter, repository)
 	return &UserController{
 		userUseCase: u,
 	}
 }
 
-func (c *UserController) GetUserByID(id string) (*usecase.UserOutputData, error) {
+func (c *UserController) GetUserByID(id string) (port.UserOutputData, error) {
 	user, err := c.userUseCase.GetUserByID(id)
 	if err != nil {
-		return nil, err
+		return port.UserOutputData{}, err
 	}
 	return user, nil
 }
 
-func (c *UserController) Save(name string, ctx context.Context) (*usecase.UserOutputData, error){
+func (c *UserController) Save(name string, ctx context.Context) (port.UserOutputData, error){
 	user, err := c.userUseCase.Save(name, ctx)
 	if err != nil {
-		return nil, err
+		return port.UserOutputData{}, err
 	}
 	return user, nil
 }

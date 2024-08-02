@@ -6,7 +6,7 @@ import (
 	"maptalk/internal/domain/usecase/port"
 	"maptalk/mock"
 
-	"github.com/golang/mock/gomock"
+	"go.uber.org/mock/gomock"
 )
 
 func TestGetUserByID(t *testing.T) {

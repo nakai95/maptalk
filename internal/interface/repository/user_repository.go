@@ -2,47 +2,39 @@ package repository
 
 import (
 	"context"
-	"maptalk/internal/domain/usecase"
+	"maptalk/internal/domain/usecase/port"
+    "maptalk/internal/interface/repository/port"
 )
 
-
-type userRepository struct{
-    datastore DataStore
+type UserRepository struct{
+    datastore repositoryPort.DataStore
 }
 
-type DataStore interface {
-    InsertData(ctx context.Context, user UserAccessData)
-}
-
-type UserAccessData struct {
-    ID   string
-    Name string
-}
-
-func NewUserRepository(datastore DataStore) usecase.UserDataAccess {
-	return &userRepository{
+func NewUserRepository(datastore repositoryPort.DataStore) port.UserDataAccess {
+	return &UserRepository{
         datastore: datastore,
     }
 }
 
-func (p *userRepository) FindByID(id string) (*usecase.UserData, error) {
-    // dummy data
-    user := &usecase.UserData{
-        ID:   id,
-        Name: "John Doe",
-    }
-    return user, nil
+func (p *UserRepository) FindByID(id string) (port.UserData, error) {
+	// dummy data
+	user := port.UserData{
+		ID:   id,
+		Name: "John Doe",
+	}
+	return user, nil
 }
 
-func (repo *userRepository) Save(user usecase.UserData, ctx context.Context) (*usecase.UserData, error) {
-    userData := &usecase.UserData{
+func (repo *UserRepository) Save(user port.UserData, ctx context.Context) (port.UserData, error) {
+    userData := port.UserData{
         ID:   user.ID,
         Name: user.Name,
     }
-    userAccessData := &UserAccessData{
+
+    data := repositoryPort.UserAccessData{
         ID:   userData.ID,
         Name: userData.Name,
     }
-    repo.datastore.InsertData(ctx, *userAccessData)
+    repo.datastore.InsertData(ctx, data)
     return userData, nil
 } 
