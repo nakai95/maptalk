@@ -4,7 +4,6 @@ go 1.22.4
 
 require (
 	cloud.google.com/go/firestore v1.15.0
-	github.com/golang/mock v1.1.1
 	github.com/labstack/echo/v4 v4.12.0
 	go.uber.org/mock v0.4.0
 )

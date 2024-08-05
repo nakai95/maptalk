@@ -12,10 +12,16 @@ import (
 type userUseCase struct {
 	outputPort port.UserOutput
 	dataAccess port.UserDataAccess
+	outputPort port.UserOutput
+	dataAccess port.UserDataAccess
 }
 
 func NewUserUseCase(outputPort port.UserOutput, dataAccess port.UserDataAccess) port.UserInput {
+func NewUserUseCase(outputPort port.UserOutput, dataAccess port.UserDataAccess) port.UserInput {
 	return &userUseCase{
+		outputPort: outputPort,
+		dataAccess: dataAccess,
+	}
 		outputPort: outputPort,
 		dataAccess: dataAccess,
 	}
