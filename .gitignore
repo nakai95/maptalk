@@ -23,3 +23,6 @@ go.work.sum
 
 # Generated files
 mock
+
+# .Ds_Store files
+.DS_Store

@@ -3,6 +3,9 @@ package usecase
 import (
 	"maptalk/internal/domain/entity"
 	"maptalk/internal/domain/usecase/port"
+    "math/rand"
+    "strconv"
+    "context"
 )
 
 // UseCase
@@ -17,6 +20,7 @@ func NewUserUseCase(outputPort port.UserOutput, dataAccess port.UserDataAccess) 
 		dataAccess: dataAccess,
 	}
 }
+
 func (u *userUseCase) GetUserByID(id string) (port.UserOutputData, error) {
 	userData, err := u.dataAccess.FindByID(id)
 	if err != nil {
@@ -28,4 +32,20 @@ func (u *userUseCase) GetUserByID(id string) (port.UserOutputData, error) {
 	userData = port.UserData(userEntity)
 
 	return u.outputPort.PresentUser(userData)
+}
+
+func (u *userUseCase) Save(name string, ctx context.Context) (port.UserOutputData, error) {
+    user := port.UserData{
+        ID: strconv.Itoa(rand.Intn(100)),
+        Name: name,
+    }
+    n, err := u.dataAccess.Save(user, ctx)
+    if err != nil {
+        return port.UserOutputData{}, err
+    }
+    userOutputData, err := u.outputPort.PresentUser(n)
+    if err != nil {
+        return port.UserOutputData{}, err
+    }
+    return userOutputData, nil
 }
