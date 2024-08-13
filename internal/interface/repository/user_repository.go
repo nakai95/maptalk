@@ -32,7 +32,6 @@ func (repo *UserRepository) Save(user port.UserData, ctx context.Context) (port.
     }
 
     data := repositoryPort.UserAccessData{
-        ID:   userData.ID,
         Name: userData.Name,
     }
     repo.datastore.InsertData(ctx, data)
