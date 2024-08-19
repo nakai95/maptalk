@@ -1,16 +1,22 @@
 package repository
 
 import (
+	"context"
 	"maptalk/internal/domain/usecase/port"
+    "maptalk/internal/interface/repository/port"
 )
 
-type userRepository struct{}
-
-func NewUserRepository() port.UserDataAccess {
-	return &userRepository{}
+type UserRepository struct{
+    datastore repositoryPort.DataStore
 }
 
-func (p *userRepository) FindByID(id string) (port.UserData, error) {
+func NewUserRepository(datastore repositoryPort.DataStore) port.UserDataAccess {
+	return &UserRepository{
+        datastore: datastore,
+    }
+}
+
+func (p *UserRepository) FindByID(id string) (port.UserData, error) {
 	// dummy data
 	user := port.UserData{
 		ID:   id,
@@ -18,3 +24,16 @@ func (p *userRepository) FindByID(id string) (port.UserData, error) {
 	}
 	return user, nil
 }
+
+func (repo *UserRepository) Save(user port.UserData, ctx context.Context) (port.UserData, error) {
+    userData := port.UserData{
+        ID:   user.ID,
+        Name: user.Name,
+    }
+
+    data := repositoryPort.UserAccessData{
+        Name: userData.Name,
+    }
+    repo.datastore.InsertData(ctx, data)
+    return userData, nil
+} 

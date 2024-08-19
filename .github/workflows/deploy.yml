@@ -1,0 +1,40 @@
+name: Deploy to Ggoogle Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: Authentication with Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker
+
+      - name: Build and push Docker image
+        run: |
+          TAG=$(echo $GITHUB_SHA | head -c7)
+          docker build -t ${IMAGE_NAME}:${TAG} .
+          docker pushu $IMAGE_NAME:${TAG}
+
+      - name: Deploy to Cloud Run
+        run: |
+          TAG=$(echo $GITHUB_SHA | head -c7)
+          gcloud run deploy web-app \
+            --image ${IMAGE_NAME}:${TAG} \
+            --platform managed \
+            --region ${GCP_REGEION} \
+            --allow-unauthenticated

@@ -1,0 +1,30 @@
+version: '3.9'
+services:
+  maptalk:
+    container_name: maptalk
+    ports:
+      - 8080:8080
+    build: 
+      context: .
+      dockerfile: ./build/Dockerfile
+    image: asia-northeast1-docker.pkg.dev/map-talk-432405/map-talk/map-talk-image:latest
+    environment:
+      FIRESTORE_EMULATOR_HOST: "firebase:9150"
+    volumes:
+      - .:/maptalk
+    env_file:
+      - ./build/.go_env
+
+  firebase:
+    build: 
+      context: .
+      dockerfile: ./build/firestore/Dockerfile
+    ports:
+      - 4000:4000
+      - 9150:9150
+    volumes:
+      - ./build/firestore/.firebaserc:/build/firestore/.firebaserc
+      - ./build/firestore/firebase.json:/build/firestore/firebase.json
+    tty: true
+    working_dir: /build/firestore
+    command: firebase emulators:start
