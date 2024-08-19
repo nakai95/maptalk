@@ -6,7 +6,8 @@ services:
       - 8080:8080
     build: 
       context: .
-      dockerfile: ./build/DockerFile
+      dockerfile: ./build/Dockerfile
+    image: asia-northeast1-docker.pkg.dev/map-talk-432405/map-talk/map-talk-image:latest
     environment:
       FIRESTORE_EMULATOR_HOST: "firebase:9150"
     volumes:
@@ -17,7 +18,7 @@ services:
   firebase:
     build: 
       context: .
-      dockerfile: ./build/firestore/DockerFile
+      dockerfile: ./build/firestore/Dockerfile
     ports:
       - 4000:4000
       - 9150:9150
