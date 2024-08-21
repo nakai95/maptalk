@@ -1,39 +1,67 @@
 package datastore
 
 import (
-    "maptalk/internal/interface/repository/port"
+	repo "maptalk/internal/interface/repository/port"
 
 	"context"
+
 	"cloud.google.com/go/firestore"
-	"fmt"
 )
 
 type Datastore struct {
-    projectID string
+	projectID string
 }
 
-func NewDataStore(projectID string) (repositoryPort.DataStore, error) {
-    return &Datastore{
-        projectID: projectID,
-    }, nil 
+func NewDataStore(projectID string) repo.DataStore {
+	return &Datastore{
+		projectID: projectID,
+	}
 }
 
-func (ds *Datastore) InsertData(ctx context.Context, user repositoryPort.UserAccessData) repositoryPort.UserOutputData{
-    client, err := firestore.NewClient(ctx, ds.projectID)
-    if err != nil {
-        fmt.Print("error")
-    }
+func (ds *Datastore) GetData(ctx context.Context, id string) (repo.UserData, error) {
+	client, err := firestore.NewClient(ctx, ds.projectID)
+	if err != nil {
+		return repo.UserData{}, err
+	}
+	defer client.Close()
 
-    defer client.Close()
+	// Get data
+	doc, err := client.Collection("users").Doc(id).Get(ctx)
+	if err != nil {
+		return repo.UserData{}, err
+	}
+	data := doc.Data()
 
-    res, _, err := client.Collection("users").Add(ctx, map[string]interface{}{
-        "name": user.Name,
-    })
-    if err != nil {
-        fmt.Printf("error")
-    }
-    return repositoryPort.UserOutputData{
-        ID: res.ID,
-        Name: user.Name,
-    }
+	return repo.UserData{
+		ID:   id,
+		Name: data["name"].(string),
+	}, nil
+}
+
+func (ds *Datastore) InsertData(ctx context.Context, user repo.UserInsertData) (repo.UserData, error) {
+	client, err := firestore.NewClient(ctx, ds.projectID)
+	if err != nil {
+		return repo.UserData{}, err
+	}
+	defer client.Close()
+
+	// Insert data
+	res, _, err := client.Collection("users").Add(ctx, map[string]interface{}{
+		"name": user.Name,
+	})
+	if err != nil {
+		return repo.UserData{}, err
+	}
+
+	// Get data
+	doc, err := client.Collection("users").Doc(res.ID).Get(ctx)
+	if err != nil {
+		return repo.UserData{}, err
+	}
+	data := doc.Data()
+
+	return repo.UserData{
+		ID:   res.ID,
+		Name: data["name"].(string),
+	}, nil
 }

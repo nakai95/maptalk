@@ -10,43 +10,38 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-type Name struct {
-	Name string `json:"name"`
-}
-
 func NewRouter() *echo.Echo {
-    e := echo.New()
+	e := echo.New()
 
-    e.Use(middleware.Logger())
-    e.Use(middleware.Recover())
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 
-	datastore, nil := datastore.NewDataStore("test-project")
+	datastore := datastore.NewDataStore("test-project")
 	userPresenter := presenter.NewUserPresenter()
-    userRepository := repository.NewUserRepository(datastore)
+	userRepository := repository.NewUserRepository(datastore)
 	userController := controller.NewUserController(userPresenter, userRepository)
-    
 
-    e.GET("/users/:id", func(c echo.Context) error {
-	    id := c.Param("id")
-        user, err := userController.GetUserByID(id)
-        if err != nil {
-            return c.JSON(500, err)
-        }
-        return c.JSON(200, user)
-    })
-
-	e.POST("/users", func(c echo.Context) error {
-		ctx := c.Request().Context()
-		n := new(Name)
-		if err := c.Bind(n); err != nil {
-			return err
-		}
-		user, err := userController.Save(n.Name, ctx)
+	e.GET("/users/:id", func(c echo.Context) error {
+		id := c.Param("id")
+		user, err := userController.GetUserByID(id)
 		if err != nil {
 			return c.JSON(500, err)
 		}
 		return c.JSON(200, user)
 	})
 
-    return e
+	e.POST("/users", func(c echo.Context) error {
+		ctx := c.Request().Context()
+		input := new(controller.UserInputData)
+		if err := c.Bind(input); err != nil {
+			return err
+		}
+		user, err := userController.Save(*input, ctx)
+		if err != nil {
+			return c.JSON(500, err)
+		}
+		return c.JSON(200, user)
+	})
+
+	return e
 }

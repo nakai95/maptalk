@@ -3,17 +3,19 @@ package repositoryPort
 import (
 	"context"
 )
+
 //go:generate mockgen -source=$GOFILE -destination=../../../../mock/mock_$GOFILE -package=mock -self_package=maptalk/mock
 
-type UserAccessData struct {
+type UserInsertData struct {
 	Name string
 }
 
-type UserOutputData struct {
+type UserData struct {
 	ID   string
 	Name string
 }
 
 type DataStore interface {
-    InsertData(ctx context.Context, data UserAccessData) UserOutputData
+	GetData(ctx context.Context, id string) (UserData, error)
+	InsertData(ctx context.Context, data UserInsertData) (UserData, error)
 }
