@@ -6,18 +6,27 @@ import (
 	"maptalk/internal/domain/usecase/port"
 )
 
-type UserController struct {
-	userUseCase port.UserInput
+type UserInputData struct {
+	Name string `json:"name"`
 }
 
-func NewUserController(presenter port.UserOutput, repository port.UserDataAccess) *UserController {
+type userController struct {
+	userUseCase port.UserUseCase
+}
+
+type UserController interface {
+	GetUserByID(id string) (port.UserOutputData, error)
+	Save(input UserInputData, ctx context.Context) (port.UserOutputData, error)
+}
+
+func NewUserController(presenter port.UserPresenter, repository port.UserRepository) UserController {
 	u := usecase.NewUserUseCase(presenter, repository)
-	return &UserController{
+	return &userController{
 		userUseCase: u,
 	}
 }
 
-func (c *UserController) GetUserByID(id string) (port.UserOutputData, error) {
+func (c *userController) GetUserByID(id string) (port.UserOutputData, error) {
 	user, err := c.userUseCase.GetUserByID(id)
 	if err != nil {
 		return port.UserOutputData{}, err
@@ -25,8 +34,9 @@ func (c *UserController) GetUserByID(id string) (port.UserOutputData, error) {
 	return user, nil
 }
 
-func (c *UserController) Save(name string, ctx context.Context) (port.UserOutputData, error){
-	user, err := c.userUseCase.Save(name, ctx)
+func (c *userController) Save(input UserInputData, ctx context.Context) (port.UserOutputData, error) {
+	draft := port.DraftUser(input)
+	user, err := c.userUseCase.Save(draft, ctx)
 	if err != nil {
 		return port.UserOutputData{}, err
 	}

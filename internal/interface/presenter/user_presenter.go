@@ -7,7 +7,7 @@ import (
 type userPresenter struct {
 }
 
-func NewUserPresenter() port.UserOutput {
+func NewUserPresenter() port.UserPresenter {
 	return &userPresenter{}
 }
 

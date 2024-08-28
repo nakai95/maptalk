@@ -10,30 +10,43 @@ import (
 )
 
 func TestGetUserByID(t *testing.T) {
+	// dummy data
+	id := "XXXXX"
+	name := "John Doe"
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	r := mock.NewMockUserDataAccess(ctrl)
-	r.EXPECT().FindByID("1").Return(port.UserData{
-		ID:   "1",
-		Name: "John Doe",
+	// mock UserPresenter
+	r := mock.NewMockUserRepository(ctrl)
+	r.EXPECT().FindByID(id).Return(port.UserData{
+		ID:   id,
+		Name: name,
 	}, nil)
 
-	p := mock.NewMockUserOutput(ctrl)
+	// mock UserPresenter
+	p := mock.NewMockUserPresenter(ctrl)
 	p.EXPECT().PresentUser(port.UserData{
-		ID:   "1",
-		Name: "John Doe",
+		ID:   id,
+		Name: name,
 	}).Return(port.UserOutputData{
-		ID:   "1",
-		Name: "John Doe",
+		ID:   id,
+		Name: name,
 	}, nil)
 
+	// create UserController
 	c := NewUserController(p, r)
-	got, err := c.GetUserByID("1")
+
+	// when
+	got, err := c.GetUserByID(id)
+
+	// then
 	want := port.UserOutputData{
-		ID:   "1",
-		Name: "John Doe",
+		ID:   id,
+		Name: name,
 	}
+
+	// compare
 	if got != want || err != nil {
 		t.Errorf("GetUserByID() = %v, %v, want match for %v, nil", got, err, want)
 	}

@@ -2,7 +2,8 @@ package repository
 
 import (
 	"context"
-	"maptalk/internal/domain/usecase/port"
+	usecase "maptalk/internal/domain/usecase/port"
+	repository "maptalk/internal/interface/repository/port"
 	"maptalk/mock"
 	"testing"
 
@@ -10,38 +11,68 @@ import (
 )
 
 func TestFindById(t *testing.T) {
+	// dummy data
+	id := "XXXXX"
+	name := "John Doe"
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
+
+	// mock DataStore
 	ds := mock.NewMockDataStore(ctrl)
+	ds.EXPECT().GetData(gomock.Any(), id).Return(repository.UserData{
+		ID:   id,
+		Name: name,
+	}, nil)
+
+	// create UserRepository
 	r := NewUserRepository(ds)
-	got, err := r.FindByID("1")
-	want := port.UserData{
-		ID:   "1",
-		Name: "John Doe",
+
+	// when
+	got, err := r.FindByID(id)
+
+	// then
+	want := usecase.UserData{
+		ID:   id,
+		Name: name,
 	}
+
+	// compare
 	if got != want || err != nil {
 		t.Errorf("FindByID() = %v, %v, want match for %v, nil", got, err, want)
 	}
 }
 
 func TestSave(t *testing.T) {
-	// when
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	ds := mock.NewMockDataStore(ctrl)
-	r := NewUserRepository(ds)
-	user := port.UserData{
-		ID:   "1",
-		Name: "John Doe",
-	}
-	ds.EXPECT().InsertData(gomock.Any(), gomock.Any())
 
+	// mock DataStore
+	ds := mock.NewMockDataStore(ctrl)
+	ds.EXPECT().InsertData(gomock.Any(), gomock.Any()).Return(repository.UserData{
+		ID:   "1",
+		Name: "John Doe",
+	}, nil)
+
+	// create UserRepository
+	r := NewUserRepository(ds)
+
+	// input data
+	user := usecase.DraftUser{
+		Name: "John Doe",
+	}
 	context := context.Background()
+
+	// when
 	got, err := r.Save(user, context)
-	want := port.UserData{
+
+	// then
+	want := usecase.UserData{
 		ID:   "1",
 		Name: "John Doe",
 	}
+
+	// compare
 	if got != want || err != nil {
 		t.Errorf("Save() = %v, %v, want match for %v, nil", got, err, want)
 	}

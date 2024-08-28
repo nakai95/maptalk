@@ -1,51 +1,58 @@
 package usecase
 
 import (
+	"context"
 	"maptalk/internal/domain/entity"
 	"maptalk/internal/domain/usecase/port"
-    "math/rand"
-    "strconv"
-    "context"
 )
 
 // UseCase
 type userUseCase struct {
-	outputPort port.UserOutput
-	dataAccess port.UserDataAccess
+	presenter  port.UserPresenter
+	repository port.UserRepository
 }
 
-func NewUserUseCase(outputPort port.UserOutput, dataAccess port.UserDataAccess) port.UserInput {
+func NewUserUseCase(presenter port.UserPresenter, repository port.UserRepository) port.UserUseCase {
 	return &userUseCase{
-		outputPort: outputPort,
-		dataAccess: dataAccess,
+		presenter:  presenter,
+		repository: repository,
 	}
 }
 
 func (u *userUseCase) GetUserByID(id string) (port.UserOutputData, error) {
-	userData, err := u.dataAccess.FindByID(id)
+	userData, err := u.repository.FindByID(id)
 	if err != nil {
 		return port.UserOutputData{}, err
 	}
 	// Convert user data to domain entity
 	userEntity := entity.User(userData)
+
+	// business logic
+
 	// Convert domain entity to user data
 	userData = port.UserData(userEntity)
 
-	return u.outputPort.PresentUser(userData)
+	return u.presenter.PresentUser(userData)
 }
 
-func (u *userUseCase) Save(name string, ctx context.Context) (port.UserOutputData, error) {
-    user := port.UserData{
-        ID: strconv.Itoa(rand.Intn(100)),
-        Name: name,
-    }
-    n, err := u.dataAccess.Save(user, ctx)
-    if err != nil {
-        return port.UserOutputData{}, err
-    }
-    userOutputData, err := u.outputPort.PresentUser(n)
-    if err != nil {
-        return port.UserOutputData{}, err
-    }
-    return userOutputData, nil
+func (u *userUseCase) Save(draft port.DraftUser, ctx context.Context) (port.UserOutputData, error) {
+	// input -> data
+	userData, err := u.repository.Save(draft, ctx)
+	if err != nil {
+		return port.UserOutputData{}, err
+	}
+	// data -> entity
+	user := entity.User(userData)
+
+	// business logic
+
+	// entity -> data
+	userData = port.UserData(user)
+
+	// data -> output
+	userOutputData, err := u.presenter.PresentUser(userData)
+	if err != nil {
+		return port.UserOutputData{}, err
+	}
+	return userOutputData, nil
 }
