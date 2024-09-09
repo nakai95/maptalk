@@ -1,5 +1,5 @@
 {
-  "cSpell.words": ["maptalk", "usecase", "gomock"],
+  "cSpell.words": ["maptalk", "usecase", "gomock", "firestore"],
   "editor.formatOnSave": true,
   "[go]": {
     "editor.defaultFormatter": "golang.go"

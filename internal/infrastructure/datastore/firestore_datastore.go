@@ -33,8 +33,9 @@ func (ds *Datastore) GetData(ctx context.Context, id string) (repo.UserData, err
 	data := doc.Data()
 
 	return repo.UserData{
-		ID:   id,
-		Name: data["name"].(string),
+		ID:     id,
+		Name:   data["name"].(string),
+		Avatar: data["avatar"].(string),
 	}, nil
 }
 
@@ -47,7 +48,8 @@ func (ds *Datastore) InsertData(ctx context.Context, user repo.UserInsertData) (
 
 	// Insert data
 	res, _, err := client.Collection("users").Add(ctx, map[string]interface{}{
-		"name": user.Name,
+		"name":   user.Name,
+		"avatar": user.Avatar,
 	})
 	if err != nil {
 		return repo.UserData{}, err
@@ -61,7 +63,8 @@ func (ds *Datastore) InsertData(ctx context.Context, user repo.UserInsertData) (
 	data := doc.Data()
 
 	return repo.UserData{
-		ID:   res.ID,
-		Name: data["name"].(string),
+		ID:     res.ID,
+		Name:   data["name"].(string),
+		Avatar: data["avatar"].(string),
 	}, nil
 }

@@ -28,7 +28,8 @@ func (r *UserRepository) FindByID(id string) (port.UserData, error) {
 func (r *UserRepository) Save(draft port.DraftUser, ctx context.Context) (port.UserData, error) {
 	// input -> data
 	data := repo.UserInsertData{
-		Name: draft.Name,
+		Name:   draft.Name,
+		Avatar: draft.Avatar,
 	}
 
 	// save data
