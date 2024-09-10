@@ -8,6 +8,7 @@ services:
       context: .
       dockerfile: ./build/Dockerfile
     image: asia-northeast1-docker.pkg.dev/map-talk-432405/map-talk/map-talk-image:latest
+    platform: linux/amd64
     environment:
       FIRESTORE_EMULATOR_HOST: "firebase:9150"
     volumes:

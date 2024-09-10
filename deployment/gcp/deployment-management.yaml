@@ -1,0 +1,18 @@
+resources:
+ - type: compute.v1.instance
+   name: map-talk
+   properties:
+     zone: asia-northeast1-a
+     machineType: zones/asia-northeast1-a/machineTypes/e2-micro
+     disks:
+      - deviceName: boot
+        type: PERSISTENT
+        boot: true
+        autoDelete: true
+        initializeParams:
+          sourceImage: https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/family/debian-12
+     networkInterfaces:
+      - network: https://www.googleapis.com/compute/v1/projects/map-talk-432405/global/networks/default
+        accessConfigs:
+         - name: External NAT
+           type: ONE_TO_ONE_NAT
