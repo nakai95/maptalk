@@ -1,4 +1,4 @@
-FROM golang:1.21.0-alpine3.18
+FROM --platform=linux/amd64 golang:1.21.0-alpine3.18
 RUN apk update
 RUN mkdir /maptalk
 WORKDIR /maptalk

@@ -16,7 +16,7 @@ func NewRouter() *echo.Echo {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	datastore := datastore.NewDataStore("test-project")
+	datastore := datastore.NewDataStore("map-talk-432405")
 	userPresenter := presenter.NewUserPresenter()
 	userRepository := repository.NewUserRepository(datastore)
 	userController := controller.NewUserController(userPresenter, userRepository)
