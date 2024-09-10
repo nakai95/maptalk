@@ -14,6 +14,7 @@ func TestFindById(t *testing.T) {
 	// dummy data
 	id := "XXXXX"
 	name := "John Doe"
+	avatar := "/avatar/avatar1.png"
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -21,8 +22,9 @@ func TestFindById(t *testing.T) {
 	// mock DataStore
 	ds := mock.NewMockDataStore(ctrl)
 	ds.EXPECT().GetData(gomock.Any(), id).Return(repository.UserData{
-		ID:   id,
-		Name: name,
+		ID:     id,
+		Name:   name,
+		Avatar: avatar,
 	}, nil)
 
 	// create UserRepository
@@ -33,8 +35,9 @@ func TestFindById(t *testing.T) {
 
 	// then
 	want := usecase.UserData{
-		ID:   id,
-		Name: name,
+		ID:     id,
+		Name:   name,
+		Avatar: avatar,
 	}
 
 	// compare
@@ -50,8 +53,9 @@ func TestSave(t *testing.T) {
 	// mock DataStore
 	ds := mock.NewMockDataStore(ctrl)
 	ds.EXPECT().InsertData(gomock.Any(), gomock.Any()).Return(repository.UserData{
-		ID:   "1",
-		Name: "John Doe",
+		ID:     "1",
+		Name:   "John Doe",
+		Avatar: "/avatar/avatar1.png",
 	}, nil)
 
 	// create UserRepository
@@ -59,7 +63,8 @@ func TestSave(t *testing.T) {
 
 	// input data
 	user := usecase.DraftUser{
-		Name: "John Doe",
+		Name:   "John Doe",
+		Avatar: "/avatar/avatar1.png",
 	}
 	context := context.Background()
 
@@ -68,8 +73,9 @@ func TestSave(t *testing.T) {
 
 	// then
 	want := usecase.UserData{
-		ID:   "1",
-		Name: "John Doe",
+		ID:     "1",
+		Name:   "John Doe",
+		Avatar: "/avatar/avatar1.png",
 	}
 
 	// compare

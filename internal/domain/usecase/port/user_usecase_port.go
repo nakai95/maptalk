@@ -8,11 +8,13 @@ import (
 
 // UseCase
 type DraftUser struct {
-	Name string
+	Name   string
+	Avatar string
 }
 type UserData struct {
-	ID   string
-	Name string
+	ID     string
+	Name   string
+	Avatar string
 }
 type UserUseCase interface {
 	GetUserByID(id string) (UserOutputData, error)
@@ -21,8 +23,9 @@ type UserUseCase interface {
 
 // Presenter
 type UserOutputData struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	Avatar string `json:"avatar"`
 }
 
 type UserPresenter interface {

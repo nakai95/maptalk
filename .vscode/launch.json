@@ -9,7 +9,10 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${cwd}/cmd/maptalk/main.go"
+      "program": "${cwd}/cmd/maptalk/main.go",
+      "env": {
+        "FIRESTORE_EMULATOR_HOST": "localhost:9150"
+      }
     }
   ]
 }
