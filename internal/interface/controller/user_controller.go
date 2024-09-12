@@ -7,8 +7,8 @@ import (
 )
 
 type UserInputData struct {
-	Name   string
-	Avatar string
+	Name   string `json:"name"`
+	Avatar string `json:"avatar"`
 }
 
 type userController struct {

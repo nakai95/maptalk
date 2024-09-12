@@ -18,7 +18,7 @@ func NewDataStore(projectID string) repo.DataStore {
 	}
 }
 
-func (ds *Datastore) GetData(ctx context.Context, id string) (repo.UserData, error) {
+func (ds *Datastore) GetUserData(ctx context.Context, id string) (repo.UserData, error) {
 	client, err := firestore.NewClient(ctx, ds.projectID)
 	if err != nil {
 		return repo.UserData{}, err
@@ -39,7 +39,7 @@ func (ds *Datastore) GetData(ctx context.Context, id string) (repo.UserData, err
 	}, nil
 }
 
-func (ds *Datastore) InsertData(ctx context.Context, user repo.UserInsertData) (repo.UserData, error) {
+func (ds *Datastore) InsertUserData(ctx context.Context, user repo.UserInsertData) (repo.UserData, error) {
 	client, err := firestore.NewClient(ctx, ds.projectID)
 	if err != nil {
 		return repo.UserData{}, err
@@ -67,4 +67,27 @@ func (ds *Datastore) InsertData(ctx context.Context, user repo.UserInsertData) (
 		Name:   data["name"].(string),
 		Avatar: data["avatar"].(string),
 	}, nil
+}
+
+func (ds *Datastore) InsertPostData(ctx context.Context, post repo.PostInsertData) error {
+	client, err := firestore.NewClient(ctx, ds.projectID)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	// Insert data
+	_, _, err = client.Collection("posts").Add(ctx, map[string]interface{}{
+		"user_id":     post.UserID,
+		"user_name":   post.UserName,
+		"user_avatar": post.UserAvatar,
+		"message":     post.Message,
+		"latitude":    post.Latitude,
+		"longitude":   post.Longitude,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
