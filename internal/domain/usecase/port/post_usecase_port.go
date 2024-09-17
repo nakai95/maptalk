@@ -45,4 +45,5 @@ type PostPresenter interface {
 // Repository
 type PostRepository interface {
 	Save(draft DraftPost, ctx context.Context) error
+	Listener(ctx context.Context) (chan PostData, error)
 }

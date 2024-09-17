@@ -12,6 +12,7 @@ type PostInsertData struct {
 }
 
 type PostData struct {
+	ID         string
 	UserID     string
 	UserName   string
 	UserAvatar string

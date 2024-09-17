@@ -2,6 +2,7 @@ package datastore
 
 import (
 	repo "maptalk/internal/interface/repository/port"
+	"time"
 
 	"context"
 
@@ -84,10 +85,54 @@ func (ds *Datastore) InsertPostData(ctx context.Context, post repo.PostInsertDat
 		"message":     post.Message,
 		"latitude":    post.Latitude,
 		"longitude":   post.Longitude,
+		"created_at":  time.Now().Unix(),
 	})
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (ds *Datastore) PostDataListener(ctx context.Context) (chan repo.PostData, error) {
+	ch := make(chan repo.PostData)
+
+	client, err := firestore.NewClient(ctx, ds.projectID)
+	if err != nil {
+		return ch, err
+	}
+
+	go func() {
+		defer close(ch)
+
+		iter := client.Collection("posts").Where("created_at", ">", time.Now().Unix()).Snapshots(ctx)
+		defer iter.Stop()
+
+		for {
+			snap, err := iter.Next()
+			if err != nil {
+				return
+			}
+
+			for _, change := range snap.Changes {
+				switch change.Kind {
+				case firestore.DocumentAdded, firestore.DocumentModified:
+					data := change.Doc.Data()
+					post := repo.PostData{
+						ID:         change.Doc.Ref.ID,
+						UserID:     data["user_id"].(string),
+						UserName:   data["user_name"].(string),
+						UserAvatar: data["user_avatar"].(string),
+						Message:    data["message"].(string),
+						Latitude:   data["latitude"].(float64),
+						Longitude:  data["longitude"].(float64),
+						CreatedAt:  data["created_at"].(int64),
+					}
+					ch <- post
+				}
+			}
+		}
+	}()
+
+	return ch, nil
 }
