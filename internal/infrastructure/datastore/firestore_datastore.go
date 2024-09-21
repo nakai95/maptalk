@@ -94,17 +94,13 @@ func (ds *Datastore) InsertPostData(ctx context.Context, post repo.PostInsertDat
 	return nil
 }
 
-func (ds *Datastore) PostDataListener(ctx context.Context) (chan repo.PostData, error) {
-	ch := make(chan repo.PostData)
-
+func (ds *Datastore) ListenPostData(ctx context.Context, sent func(repo.PostSavedData)) error {
 	client, err := firestore.NewClient(ctx, ds.projectID)
 	if err != nil {
-		return ch, err
+		return err
 	}
 
 	go func() {
-		defer close(ch)
-
 		iter := client.Collection("posts").Where("created_at", ">", time.Now().Unix()).Snapshots(ctx)
 		defer iter.Stop()
 
@@ -114,25 +110,30 @@ func (ds *Datastore) PostDataListener(ctx context.Context) (chan repo.PostData, 
 				return
 			}
 
-			for _, change := range snap.Changes {
-				switch change.Kind {
-				case firestore.DocumentAdded, firestore.DocumentModified:
-					data := change.Doc.Data()
-					post := repo.PostData{
-						ID:         change.Doc.Ref.ID,
-						UserID:     data["user_id"].(string),
-						UserName:   data["user_name"].(string),
-						UserAvatar: data["user_avatar"].(string),
-						Message:    data["message"].(string),
-						Latitude:   data["latitude"].(float64),
-						Longitude:  data["longitude"].(float64),
-						CreatedAt:  data["created_at"].(int64),
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				for _, change := range snap.Changes {
+					switch change.Kind {
+					case firestore.DocumentAdded, firestore.DocumentModified:
+						data := change.Doc.Data()
+						post := repo.PostSavedData{
+							ID:         change.Doc.Ref.ID,
+							UserID:     data["user_id"].(string),
+							UserName:   data["user_name"].(string),
+							UserAvatar: data["user_avatar"].(string),
+							Message:    data["message"].(string),
+							Latitude:   data["latitude"].(float64),
+							Longitude:  data["longitude"].(float64),
+							CreatedAt:  data["created_at"].(int64),
+						}
+						sent(post)
 					}
-					ch <- post
 				}
 			}
 		}
 	}()
 
-	return ch, nil
+	return nil
 }

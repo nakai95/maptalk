@@ -36,36 +36,32 @@ func (r *PostRepository) Save(draft port.DraftPost, ctx context.Context) error {
 	return nil
 }
 
-func (r *PostRepository) Listener(ctx context.Context) (chan port.PostData, error) {
-	ch := make(chan port.PostData)
+func (r *PostRepository) ListenForChanges(ctx context.Context, ch chan<- port.PostData) error {
 
-	go func() {
-		defer close(ch)
+	// create send function
+	send := func(data repo.PostSavedData) {
+		post := port.PostData{
+			ID: data.ID,
+			User: port.UserOutputData{
+				ID:     data.UserID,
+				Name:   data.UserName,
+				Avatar: data.UserAvatar,
+			},
+			Message: data.Message,
 
-		// Listen data
-		dbCh, err := r.datastore.PostDataListener(ctx)
-		if err != nil {
-			return
+			CreatedAt: data.CreatedAt,
 		}
+		post.Coordinate.Latitude = data.Latitude
+		post.Coordinate.Longitude = data.Longitude
 
-		for post := range dbCh {
-			data := port.PostData{
-				ID: post.ID,
-				User: port.UserOutputData{
-					ID:     post.UserID,
-					Name:   post.UserName,
-					Avatar: post.UserAvatar,
-				},
-				Message: post.Message,
+		ch <- post
+	}
 
-				CreatedAt: post.CreatedAt,
-			}
-			data.Coordinate.Latitude = post.Latitude
-			data.Coordinate.Longitude = post.Longitude
+	// Listen data
+	err := r.datastore.ListenPostData(ctx, send)
+	if err != nil {
+		return err
+	}
 
-			ch <- data
-		}
-	}()
-
-	return ch, nil
+	return nil
 }

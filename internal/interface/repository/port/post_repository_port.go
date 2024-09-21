@@ -11,7 +11,7 @@ type PostInsertData struct {
 	Longitude  float64
 }
 
-type PostData struct {
+type PostSavedData struct {
 	ID         string
 	UserID     string
 	UserName   string

@@ -1,14 +1,12 @@
 package router
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
-	"log"
 	"maptalk/internal/infrastructure/datastore"
 	"maptalk/internal/interface/controller"
 	"maptalk/internal/interface/presenter"
 	"maptalk/internal/interface/repository"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -81,58 +79,30 @@ func NewRouter() *echo.Echo {
 	})
 
 	e.GET("/sse", func(c echo.Context) error {
-		log.Printf("SSE client connected, ip: %v", c.RealIP())
-
 		w := c.Response()
 		w.Header().Set("Content-Type", "text/event-stream")
 		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("Connection", "keep-alive")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 
-		ticker := time.NewTicker(10 * time.Second)
-		defer ticker.Stop()
+		sent := func(bytes []byte) {
+			fmt.Fprintf(w, "data: %s\n\n", bytes)
+			w.Flush()
+		}
 
-		ch, err := postRepository.Listener(c.Request().Context())
+		type key int
+		var ip key
+
+		ctx := c.Request().Context()
+		ctx = context.WithValue(ctx, ip, c.RealIP())
+
+		err := postController.Broadcast(sent, ctx)
+
 		if err != nil {
 			return c.JSON(500, err)
 		}
 
-		for {
-			select {
-			case <-c.Request().Context().Done():
-				log.Printf("SSE client disconnected, ip: %v", c.RealIP())
-				return nil
-
-			case post := <-ch:
-				if post.ID == "" {
-					continue
-				}
-				output, err := postPresenter.PresentPost(post)
-				if err != nil {
-					return c.JSON(500, err)
-				}
-
-				bytes, _ := json.Marshal(output)
-
-				fmt.Fprintf(w, "data: %s\n\n", bytes)
-				w.Flush()
-				// case <-ticker.C:
-				// 	post := <-ch
-
-				// 	if post.ID == "" {
-				// 		continue
-				// 	}
-
-				// 	output, err := postPresenter.PresentPost(post)
-				// 	if err != nil {
-				// 		return c.JSON(500, err)
-				// 	}
-
-				// 	fmt.Fprintf(w, "data: %#v\n\n", output)
-				// 	w.Flush()
-
-			}
-		}
+		return nil
 	})
 
 	return e

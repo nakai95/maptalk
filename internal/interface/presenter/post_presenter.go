@@ -1,6 +1,7 @@
 package presenter
 
 import (
+	"encoding/json"
 	"maptalk/internal/domain/usecase/port"
 )
 
@@ -21,4 +22,16 @@ func (p *postPresenter) PresentPost(post port.PostData) (port.PostOutputData, er
 	postOutputData.CreatedAt = post.CreatedAt
 
 	return postOutputData, nil
+}
+
+func (p *postPresenter) ConvertBytes(post port.PostData) ([]byte, error) {
+	output, err := p.PresentPost(post)
+	if err != nil {
+		return nil, err
+	}
+	bytes, err := json.Marshal(output)
+	if err != nil {
+		return nil, err
+	}
+	return bytes, nil
 }

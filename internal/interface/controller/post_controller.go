@@ -34,6 +34,7 @@ type postController struct {
 
 type PostController interface {
 	Save(data FormattedPost, ctx context.Context) error
+	Broadcast(send func([]byte), ctx context.Context) error
 }
 
 func NewPostController(presenter port.PostPresenter, repository port.PostRepository) PostController {
@@ -50,6 +51,14 @@ func (c *postController) Save(data FormattedPost, ctx context.Context) error {
 		Coordinate: data.Coordinate}
 
 	err := c.postUseCase.Save(draft, ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *postController) Broadcast(send func([]byte), ctx context.Context) error {
+	err := c.postUseCase.Broadcast(send, ctx)
 	if err != nil {
 		return err
 	}

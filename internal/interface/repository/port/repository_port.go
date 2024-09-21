@@ -10,5 +10,5 @@ type DataStore interface {
 	GetUserData(ctx context.Context, id string) (UserData, error)
 	InsertUserData(ctx context.Context, data UserInsertData) (UserData, error)
 	InsertPostData(ctx context.Context, data PostInsertData) error
-	PostDataListener(ctx context.Context) (chan PostData, error)
+	ListenPostData(ctx context.Context, send func(PostSavedData)) error
 }

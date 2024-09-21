@@ -27,3 +27,19 @@ func (u *postUseCase) Save(draft port.DraftPost, ctx context.Context) error {
 
 	return nil
 }
+
+func (u *postUseCase) Broadcast(send func([]byte), ctx context.Context) error {
+	ch := make(chan port.PostData)
+	err := u.repository.ListenForChanges(ctx, ch)
+	if err != nil {
+		return err
+	}
+	for post := range ch {
+		bytes, err := u.presenter.ConvertBytes(post)
+		if err != nil {
+			return err
+		}
+		send(bytes)
+	}
+	return nil
+}
