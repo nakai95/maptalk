@@ -46,7 +46,7 @@ func TestFindById(t *testing.T) {
 	}
 }
 
-func TestSave(t *testing.T) {
+func TestSaveUser(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

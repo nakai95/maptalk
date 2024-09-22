@@ -57,7 +57,7 @@ func TestGetUserByID(t *testing.T) {
 	}
 }
 
-func TestSave(t *testing.T) {
+func TestSaveUser(t *testing.T) {
 	// dummy data
 	id := "XXXXXX"
 	name := "John Doe"
