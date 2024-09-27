@@ -1,8 +1,8 @@
 package router
 
 import (
-	"context"
 	"fmt"
+	"log"
 	"maptalk/internal/infrastructure/datastore"
 	"maptalk/internal/interface/controller"
 	"maptalk/internal/interface/presenter"
@@ -79,30 +79,29 @@ func NewRouter() *echo.Echo {
 	})
 
 	e.GET("/sse", func(c echo.Context) error {
+		log.Printf("SSE client connected, ip: %v", c.RealIP())
 		w := c.Response()
 		w.Header().Set("Content-Type", "text/event-stream")
 		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("Connection", "keep-alive")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 
-		sent := func(bytes []byte) {
-			fmt.Fprintf(w, "data: %s\n\n", bytes)
-			w.Flush()
-		}
-
-		type key int
-		var ip key
-
 		ctx := c.Request().Context()
-		ctx = context.WithValue(ctx, ip, c.RealIP())
+		broadcast := make(chan []byte)
+		defer close(broadcast)
 
-		err := postController.Broadcast(sent, ctx)
+		postController.Broadcast(ctx, broadcast)
 
-		if err != nil {
-			return c.JSON(500, err)
+		for {
+			select {
+			case <-ctx.Done():
+				log.Printf("SSE client disconnected, ip: %v", c.RealIP())
+				return nil
+			case data := <-broadcast:
+				fmt.Fprintf(w, "data: %s\n\n", data)
+				w.Flush()
+			}
 		}
-
-		return nil
 	})
 
 	return e

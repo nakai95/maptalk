@@ -24,7 +24,7 @@ type PostData struct {
 
 type PostUseCase interface {
 	Save(draft DraftPost, ctx context.Context) error
-	Broadcast(send func([]byte), ctx context.Context) error
+	Broadcast(ctx context.Context, ch chan<- []byte)
 }
 
 // Presenter
@@ -47,5 +47,5 @@ type PostPresenter interface {
 // Repository
 type PostRepository interface {
 	Save(draft DraftPost, ctx context.Context) error
-	ListenForChanges(ctx context.Context, ch chan<- PostData) error
+	ListenForChanges(ctx context.Context, ch chan<- PostData)
 }

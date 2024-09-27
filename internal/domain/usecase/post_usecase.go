@@ -28,18 +28,22 @@ func (u *postUseCase) Save(draft port.DraftPost, ctx context.Context) error {
 	return nil
 }
 
-func (u *postUseCase) Broadcast(send func([]byte), ctx context.Context) error {
-	ch := make(chan port.PostData)
-	err := u.repository.ListenForChanges(ctx, ch)
-	if err != nil {
-		return err
-	}
-	for post := range ch {
-		bytes, err := u.presenter.ConvertBytes(post)
-		if err != nil {
-			return err
+func (u *postUseCase) Broadcast(ctx context.Context, ch chan<- []byte) {
+	dataCh := make(chan port.PostData)
+	defer close(dataCh)
+
+	go u.repository.ListenForChanges(ctx, dataCh)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case d := <-dataCh:
+			bytes, err := u.presenter.ConvertBytes(d)
+			if err != nil {
+				continue
+			}
+			ch <- bytes
 		}
-		send(bytes)
 	}
-	return nil
 }

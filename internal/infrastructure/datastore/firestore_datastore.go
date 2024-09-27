@@ -94,46 +94,38 @@ func (ds *Datastore) InsertPostData(ctx context.Context, post repo.PostInsertDat
 	return nil
 }
 
-func (ds *Datastore) ListenPostData(ctx context.Context, sent func(repo.PostSavedData)) error {
+func (ds *Datastore) ListenPostData(ctx context.Context, ch chan<- repo.PostSavedData) {
 	client, err := firestore.NewClient(ctx, ds.projectID)
 	if err != nil {
-		return err
+		return
 	}
 
-	go func() {
-		iter := client.Collection("posts").Where("created_at", ">", time.Now().Unix()).Snapshots(ctx)
-		defer iter.Stop()
+	iter := client.Collection("posts").Where("created_at", ">", time.Now().Unix()).Snapshots(ctx)
+	defer iter.Stop()
 
-		for {
-			snap, err := iter.Next()
-			if err != nil {
-				return
-			}
+	for {
+		snap, err := iter.Next()
+		if err != nil {
+			return
+		}
 
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				for _, change := range snap.Changes {
-					switch change.Kind {
-					case firestore.DocumentAdded, firestore.DocumentModified:
-						data := change.Doc.Data()
-						post := repo.PostSavedData{
-							ID:         change.Doc.Ref.ID,
-							UserID:     data["user_id"].(string),
-							UserName:   data["user_name"].(string),
-							UserAvatar: data["user_avatar"].(string),
-							Message:    data["message"].(string),
-							Latitude:   data["latitude"].(float64),
-							Longitude:  data["longitude"].(float64),
-							CreatedAt:  data["created_at"].(int64),
-						}
-						sent(post)
+		if snap != nil {
+			for _, change := range snap.Changes {
+				switch change.Kind {
+				case firestore.DocumentAdded, firestore.DocumentModified:
+					post := change.Doc.Data()
+					ch <- repo.PostSavedData{
+						ID:         change.Doc.Ref.ID,
+						UserID:     post["user_id"].(string),
+						UserName:   post["user_name"].(string),
+						UserAvatar: post["user_avatar"].(string),
+						Message:    post["message"].(string),
+						Latitude:   post["latitude"].(float64),
+						Longitude:  post["longitude"].(float64),
+						CreatedAt:  post["created_at"].(int64),
 					}
 				}
 			}
 		}
-	}()
-
-	return nil
+	}
 }

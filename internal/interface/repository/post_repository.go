@@ -36,32 +36,45 @@ func (r *PostRepository) Save(draft port.DraftPost, ctx context.Context) error {
 	return nil
 }
 
-func (r *PostRepository) ListenForChanges(ctx context.Context, ch chan<- port.PostData) error {
+func (r *PostRepository) ListenForChanges(ctx context.Context, ch chan<- port.PostData) {
+	data := make(chan repo.PostSavedData)
+	defer close(data)
 
-	// create send function
-	send := func(data repo.PostSavedData) {
-		post := port.PostData{
-			ID: data.ID,
-			User: port.UserOutputData{
-				ID:     data.UserID,
-				Name:   data.UserName,
-				Avatar: data.UserAvatar,
-			},
-			Message: data.Message,
-
-			CreatedAt: data.CreatedAt,
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				r.datastore.ListenPostData(ctx, data)
+			}
 		}
-		post.Coordinate.Latitude = data.Latitude
-		post.Coordinate.Longitude = data.Longitude
+	}()
 
-		ch <- post
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case d := <-data:
+			postData := r.convertDataToPostData(d)
+			ch <- postData
+		}
 	}
+}
 
-	// Listen data
-	err := r.datastore.ListenPostData(ctx, send)
-	if err != nil {
-		return err
+func (r *PostRepository) convertDataToPostData(data repo.PostSavedData) port.PostData {
+	postData := port.PostData{
+		ID: data.ID,
+		User: port.UserOutputData{
+			ID:     data.UserID,
+			Name:   data.UserName,
+			Avatar: data.UserAvatar,
+		},
+		Message:   data.Message,
+		CreatedAt: data.CreatedAt,
 	}
+	postData.Coordinate.Latitude = data.Latitude
+	postData.Coordinate.Longitude = data.Longitude
 
-	return nil
+	return postData
 }
