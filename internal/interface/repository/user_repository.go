@@ -18,7 +18,7 @@ func NewUserRepository(datastore repo.DataStore) port.UserRepository {
 
 func (r *UserRepository) FindByID(id string) (port.UserData, error) {
 	// id -> data
-	data, err := r.datastore.GetData(context.Background(), id)
+	data, err := r.datastore.GetUserData(context.Background(), id)
 	if err != nil {
 		return port.UserData{}, err
 	}
@@ -33,7 +33,7 @@ func (r *UserRepository) Save(draft port.DraftUser, ctx context.Context) (port.U
 	}
 
 	// save data
-	userData, err := r.datastore.InsertData(ctx, data)
+	userData, err := r.datastore.InsertUserData(ctx, data)
 	if err != nil {
 		return port.UserData{}, err
 	}

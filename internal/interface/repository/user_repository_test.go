@@ -21,7 +21,7 @@ func TestFindById(t *testing.T) {
 
 	// mock DataStore
 	ds := mock.NewMockDataStore(ctrl)
-	ds.EXPECT().GetData(gomock.Any(), id).Return(repository.UserData{
+	ds.EXPECT().GetUserData(gomock.Any(), id).Return(repository.UserData{
 		ID:     id,
 		Name:   name,
 		Avatar: avatar,
@@ -46,13 +46,13 @@ func TestFindById(t *testing.T) {
 	}
 }
 
-func TestSave(t *testing.T) {
+func TestSaveUser(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	// mock DataStore
 	ds := mock.NewMockDataStore(ctrl)
-	ds.EXPECT().InsertData(gomock.Any(), gomock.Any()).Return(repository.UserData{
+	ds.EXPECT().InsertUserData(gomock.Any(), gomock.Any()).Return(repository.UserData{
 		ID:     "1",
 		Name:   "John Doe",
 		Avatar: "/avatar/avatar1.png",
